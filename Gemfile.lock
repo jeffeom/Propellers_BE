@@ -1,10 +1,29 @@
 GEM
   specs:
+    faraday (0.14.0)
+      multipart-post (>= 1.2, < 3)
+    json (2.1.0)
+    multipart-post (2.0.0)
+    mustermann (1.0.2)
+    rack (2.0.3)
+    rack-protection (2.0.1)
+      rack
+    sinatra (2.0.1)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.1)
+      tilt (~> 2.0)
+    stripe (3.11.0)
+      faraday (~> 0.10)
+    tilt (2.0.8)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  json
+  sinatra
+  stripe
 
 BUNDLED WITH
    1.16.0
