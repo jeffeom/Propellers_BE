@@ -2,6 +2,7 @@
 require 'sinatra'
 require 'stripe'
 require 'json'
+require './key' if File.exists?('key.rb')
 
 Stripe.api_key = ENV['test_key']
 
