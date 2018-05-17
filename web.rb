@@ -51,8 +51,8 @@ class PropellerWeb < Sinatra::Base
     else
       begin
         @customer = Stripe::Customer.create(
-          :email => payload[:email],
-          :source => payload[:token]
+          :email => session[:email],
+          :source => session[:token]
         )
       rescue Stripe::InvalidRequestError
       end
