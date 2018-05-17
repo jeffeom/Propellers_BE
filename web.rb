@@ -32,4 +32,37 @@ class PropellerWeb < Sinatra::Base
     status 200
     return "Charge successfully created"
   end
+
+  post '/create_customer' do
+    payload = params
+    if request.content_type.include? 'application/json' and params.empty?
+      payload = indifferent_params(JSON.parse(request.body.read))
+    end
+
+    begin
+      customer = Stripe::Customer.create(
+        :email => payload[:email],
+        :source => payload[:token]
+      )
+    rescue Stripe::StripeError => e
+      status 402
+      return "Error creating customer: #{e.message}"
+    end
+  end
+
+  post '/get_customer' do
+    payload = params
+    if request.content_type.include? 'application/json' and params.empty?
+      payload = indifferent_params(JSON.parse(request.body.read))
+    end
+
+    begin
+      customer = Stripe::Customer.retrieve(
+        :customer => payload[:customer_id]
+      )
+    rescue Stripe::StripeError => e
+      status 402
+      return "Error creating customer: #{e.message}"
+    end
+  end
 end
