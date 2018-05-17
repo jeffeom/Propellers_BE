@@ -13,16 +13,23 @@ class PropellerWeb < Sinatra::Base
   end
 
   post '/charge' do
+    authenticate!
+    # Get the credit card details submitted
     payload = params
     if request.content_type.include? 'application/json' and params.empty?
       payload = indifferent_params(JSON.parse(request.body.read))
     end
 
+    source = payload[:token]
+    customer = payload[:customer_id] || @customer.id
+    # Create the charge on Stripe's servers - this will charge the user's card
+
     begin
       charge = Stripe::Charge.create(
         :amount => payload[:amount],
         :currency => payload[:currency],
-        :source => payload[:token],
+        :customer => customer,
+        :source => source,
         :description => payload[:description]
       )
       rescue Stripe::StripeError => e
@@ -33,40 +40,24 @@ class PropellerWeb < Sinatra::Base
     return "Charge successfully created"
   end
 
-  post '/create_customer' do
-    payload = params
-    if request.content_type.include? 'application/json' and params.empty?
-      payload = indifferent_params(JSON.parse(request.body.read))
+  def authenticate!
+    return @customer if @customer
+    if session.has_key?(:customer_id)
+      customer_id = session[:customer_id]
+      begin
+        @customer = Stripe::Customer.retrieve(customer_id)
+      rescue Stripe::InvalidRequestError
+      end
+    else
+      begin
+        @customer = Stripe::Customer.create(
+          :email => payload[:email],
+          :source => payload[:token]
+        )
+      rescue Stripe::InvalidRequestError
+      end
+      session[:customer_id] = @customer.id
     end
-
-    begin
-      customer = Stripe::Customer.create(
-        :email => payload[:email],
-        :source => payload[:token]
-      )
-      rescue Stripe::StripeError => e
-      status 402
-      return "Error creating customer: #{e.message}"
-    end
-    status 200
-    return "Customer successfully created"
-  end
-
-  post '/get_customer' do
-    payload = params
-    if request.content_type.include? 'application/json' and params.empty?
-      payload = indifferent_params(JSON.parse(request.body.read))
-    end
-
-    begin
-      customer = Stripe::Customer.retrieve(
-        :customer => payload[:customer_id]
-      )
-      rescue Stripe::StripeError => e
-      status 402
-      return "Error creating customer: #{e.message}"
-    end
-    status 200
-    return "Customer successfully retrieved"
+    @customer
   end
 end
