@@ -44,10 +44,12 @@ class PropellerWeb < Sinatra::Base
         :email => payload[:email],
         :source => payload[:token]
       )
-    rescue Stripe::StripeError => e
+      rescue Stripe::StripeError => e
       status 402
       return "Error creating customer: #{e.message}"
     end
+    status 200
+    return "Customer successfully created"
   end
 
   post '/get_customer' do
@@ -60,9 +62,11 @@ class PropellerWeb < Sinatra::Base
       customer = Stripe::Customer.retrieve(
         :customer => payload[:customer_id]
       )
-    rescue Stripe::StripeError => e
+      rescue Stripe::StripeError => e
       status 402
       return "Error creating customer: #{e.message}"
     end
+    status 200
+    return "Customer successfully retrieved"
   end
 end
