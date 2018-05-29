@@ -29,7 +29,7 @@ class PropellerWeb < Sinatra::Base
         :amount => payload[:amount],
         :currency => payload[:currency],
         :customer => customer,
-        # :source => source,
+        :source => source,
         :description => payload[:description]
       )
       rescue Stripe::StripeError => e
